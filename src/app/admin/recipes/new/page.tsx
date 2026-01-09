@@ -171,7 +171,7 @@ export default function NewRecipePage() {
     setError(null);
     setSuccess(false);
 
-    // Validation
+    // Basic validation - title is always required
     if (!title.trim()) {
       setError("Recipe title is required");
       return;
@@ -180,17 +180,31 @@ export default function NewRecipePage() {
       setError("URL slug is required");
       return;
     }
-    if (!description.trim()) {
-      setError("Short description is required");
-      return;
-    }
-    if (ingredientGroups.some((g) => g.items.some((i) => !i.trim()))) {
-      setError("Please fill in all ingredient fields");
-      return;
-    }
-    if (instructions.some((i) => !i.text.trim())) {
-      setError("Please fill in all instruction fields");
-      return;
+
+    // Additional validation when publishing
+    if (status === "published") {
+      if (!introText.trim()) {
+        setError("Introduction text is required for published recipes");
+        return;
+      }
+      if (!featuredImage.trim()) {
+        setError("Featured image is required for published recipes");
+        return;
+      }
+      // Check if any ingredient group has items
+      const hasIngredients = ingredientGroups.some((g) =>
+        g.items.some((i) => i.trim())
+      );
+      if (!hasIngredients) {
+        setError("At least one ingredient is required for published recipes");
+        return;
+      }
+      // Check if any instruction has text
+      const hasInstructions = instructions.some((i) => i.text.trim());
+      if (!hasInstructions) {
+        setError("At least one instruction is required for published recipes");
+        return;
+      }
     }
 
     setSaving(true);
@@ -661,6 +675,22 @@ export default function NewRecipePage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Bottom Save Button */}
+      <div className="flex items-center justify-end gap-3 pt-6 border-t border-cream-200 mt-6">
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as "draft" | "published")}
+          className="h-10 px-3 rounded-lg border border-cream-300 bg-white text-sm"
+        >
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
+        <Button onClick={handleSave} disabled={saving}>
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? "Saving..." : "Save Recipe"}
+        </Button>
       </div>
     </div>
   );

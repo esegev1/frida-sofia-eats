@@ -1,16 +1,72 @@
+"use client";
+
+// Prevent static prerendering - this is a dynamic admin page
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChefHat, FolderOpen, Star, Plus } from "lucide-react";
+import { ChefHat, FolderOpen, Star, Plus, FileText, CheckCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
-// Placeholder stats - will be replaced with Supabase queries
-const stats = [
-  { name: "Total Recipes", value: "0", icon: ChefHat, href: "/admin/recipes" },
-  { name: "Categories", value: "10", icon: FolderOpen, href: "/admin/categories" },
-  { name: "Reviews", value: "0", icon: Star, href: "/admin/recipes" },
-];
+interface Recipe {
+  id: string;
+  status: "draft" | "published" | "archived";
+}
+
+interface Category {
+  id: string;
+}
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({
+    draftCount: 0,
+    publishedCount: 0,
+    categoryCount: 0,
+    reviewCount: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        // Fetch recipes
+        const recipesRes = await fetch("/api/recipes");
+        const recipes: Recipe[] = await recipesRes.json();
+
+        // Fetch categories
+        const categoriesRes = await fetch("/api/categories");
+        const categories: Category[] = await categoriesRes.json();
+
+        setStats({
+          draftCount: recipes.filter((r) => r.status === "draft").length,
+          publishedCount: recipes.filter((r) => r.status === "published").length,
+          categoryCount: categories.length,
+          reviewCount: 0, // TODO: Implement reviews
+        });
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  const statCards = [
+    { name: "Draft Recipes", value: stats.draftCount.toString(), icon: FileText, href: "/admin/recipes", color: "text-orange-500" },
+    { name: "Published Recipes", value: stats.publishedCount.toString(), icon: CheckCircle, href: "/admin/recipes", color: "text-green-500" },
+    { name: "Categories", value: stats.categoryCount.toString(), icon: FolderOpen, href: "/admin/categories", color: "text-terracotta-500" },
+    { name: "Reviews", value: stats.reviewCount.toString(), icon: Star, href: "/admin/recipes", color: "text-yellow-500" },
+  ];
   return (
     <div className="max-w-6xl">
       {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
@@ -32,15 +88,15 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statCards.map((stat) => (
           <Link key={stat.name} href={stat.href}>
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600">
                   {stat.name}
                 </CardTitle>
-                <stat.icon className="h-5 w-5 text-terracotta-500" />
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
