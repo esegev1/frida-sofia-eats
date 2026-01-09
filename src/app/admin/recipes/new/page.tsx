@@ -195,7 +195,6 @@ export default function NewRecipePage() {
 
     setSaving(true);
     try {
-      // TODO: Save to Supabase
       const recipeData = {
         title,
         slug,
@@ -218,17 +217,24 @@ export default function NewRecipePage() {
         },
       };
 
-      console.log("📝 Saving recipe:", recipeData);
+      const response = await fetch("/api/recipes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recipeData),
+      });
 
-      // Simulate save delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to save recipe");
+      }
 
       setSuccess(true);
       setTimeout(() => {
-        // Uncomment when Supabase integration is ready:
-        // router.push("/admin/recipes");
-        setSuccess(false);
-      }, 2000);
+        router.push("/admin/recipes");
+      }, 1500);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to save recipe"

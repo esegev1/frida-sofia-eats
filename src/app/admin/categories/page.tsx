@@ -3,41 +3,56 @@
 // Prevent static prerendering - this is a dynamic admin page
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, GripVertical, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, X, Check, Loader2 } from "lucide-react";
 import slugify from "slugify";
 
-// Placeholder - will be fetched from Supabase
-const initialCategories = [
-  { id: "1", name: "Mains", slug: "mains", description: "Main course recipes for dinner", recipeCount: 0 },
-  { id: "2", name: "Pasta", slug: "pasta", description: "Pasta dishes and noodle recipes", recipeCount: 0 },
-  { id: "3", name: "Chicken", slug: "chicken", description: "Chicken recipes", recipeCount: 0 },
-  { id: "4", name: "Beef", slug: "beef", description: "Beef recipes", recipeCount: 0 },
-  { id: "5", name: "Seafood", slug: "seafood", description: "Seafood and fish recipes", recipeCount: 0 },
-  { id: "6", name: "Soups", slug: "soups", description: "Soups and stews", recipeCount: 0 },
-  { id: "7", name: "Appetizers", slug: "appetizers", description: "Starters and appetizers", recipeCount: 0 },
-  { id: "8", name: "Side Dishes", slug: "side-dishes", description: "Side dishes and accompaniments", recipeCount: 0 },
-  { id: "9", name: "Breakfast", slug: "breakfast", description: "Breakfast and brunch recipes", recipeCount: 0 },
-  { id: "10", name: "Desserts", slug: "desserts", description: "Sweet treats and desserts", recipeCount: 0 },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  recipeCount: number;
+}
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const startEditing = (category: typeof categories[0]) => {
+  // Fetch categories from API
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/categories");
+      if (!response.ok) throw new Error("Failed to fetch categories");
+      const data = await response.json();
+      setCategories(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const startEditing = (category: Category) => {
     setEditingId(category.id);
     setEditName(category.name);
-    setEditDescription(category.description);
+    setEditDescription(category.description || "");
   };
 
   const cancelEditing = () => {
@@ -46,48 +61,104 @@ export default function CategoriesPage() {
     setEditDescription("");
   };
 
-  const saveEdit = (id: string) => {
-    setCategories(
-      categories.map((cat) =>
-        cat.id === id
-          ? {
-              ...cat,
-              name: editName,
-              slug: slugify(editName, { lower: true, strict: true }),
-              description: editDescription,
-            }
-          : cat
-      )
-    );
-    cancelEditing();
-    // TODO: Save to Supabase
-  };
+  const saveEdit = async (id: string) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name: editName,
+          slug: slugify(editName, { lower: true, strict: true }),
+          description: editDescription,
+        }),
+      });
 
-  const deleteCategory = (id: string) => {
-    if (confirm("Are you sure you want to delete this category?")) {
-      setCategories(categories.filter((cat) => cat.id !== id));
-      // TODO: Delete from Supabase
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to update category");
+      }
+
+      await fetchCategories();
+      cancelEditing();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update category");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const addCategory = () => {
-    if (!newName.trim()) return;
-    const newCategory = {
-      id: Date.now().toString(),
-      name: newName,
-      slug: slugify(newName, { lower: true, strict: true }),
-      description: newDescription,
-      recipeCount: 0,
-    };
-    setCategories([...categories, newCategory]);
-    setNewName("");
-    setNewDescription("");
-    setShowAddForm(false);
-    // TODO: Save to Supabase
+  const deleteCategory = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this category?")) return;
+
+    setError(null);
+    try {
+      const response = await fetch(`/api/categories?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to delete category");
+      }
+
+      await fetchCategories();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete category");
+    }
   };
+
+  const addCategory = async () => {
+    if (!newName.trim()) return;
+
+    setSaving(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newName,
+          slug: slugify(newName, { lower: true, strict: true }),
+          description: newDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to create category");
+      }
+
+      await fetchCategories();
+      setNewName("");
+      setNewDescription("");
+      setShowAddForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create category");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
       {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
@@ -134,8 +205,11 @@ export default function CategoriesPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={addCategory}>Add Category</Button>
-              <Button variant="outline" onClick={() => setShowAddForm(false)}>
+              <Button onClick={addCategory} disabled={saving}>
+                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Add Category
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddForm(false)} disabled={saving}>
                 Cancel
               </Button>
             </div>

@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import { Instagram, Youtube, Facebook } from "lucide-react";
 
 const navigation = {
@@ -49,6 +53,33 @@ const navigation = {
 };
 
 export function Footer() {
+  const router = useRouter();
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Secret admin access: Triple-click the period after copyright year
+  const handleSecretClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+
+    // Clear any existing timeout
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current);
+    }
+
+    // If 5 clicks within the timeout period, go to admin
+    if (newCount >= 5) {
+      setClickCount(0);
+      router.push("/admin");
+      return;
+    }
+
+    // Reset count after 2 seconds of no clicks
+    clickTimeout.current = setTimeout(() => {
+      setClickCount(0);
+    }, 2000);
+  };
+
   return (
     <footer className="bg-cream-100 border-t border-cream-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -143,7 +174,15 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-cream-200">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-500">
-              © {new Date().getFullYear()} Frida Sofia Eats. All rights reserved.
+              © {new Date().getFullYear()} Frida Sofia Eats
+              <span
+                onClick={handleSecretClick}
+                className="cursor-default select-none"
+                title=""
+              >
+                .
+              </span>{" "}
+              All rights reserved.
             </p>
             {/* Raptive ad disclosure - required for ad networks */}
             <p className="text-xs text-gray-400 text-center md:text-right max-w-md">

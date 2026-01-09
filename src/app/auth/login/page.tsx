@@ -10,12 +10,9 @@ function LoginContent() {
   const error = searchParams.get("error");
   const redirect = searchParams.get("redirect") || "/admin";
 
-  console.log("[Login] Page loaded with redirect:", redirect, "error:", error);
-
   const handleGoogleLogin = async () => {
     const supabase = createClient();
     const callbackUrl = `${window.location.origin}/auth/callback?next=${redirect}`;
-    console.log("[Login] Starting OAuth with callback URL:", callbackUrl);
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

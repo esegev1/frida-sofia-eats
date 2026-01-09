@@ -36,11 +36,8 @@ export async function middleware(request: NextRequest) {
 
   // Protect admin routes
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    console.log("[Middleware] Admin route access:", request.nextUrl.pathname, "User:", user?.email);
-
     if (!user) {
       // Not logged in - redirect to login
-      console.log("[Middleware] No user, redirecting to login");
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
       url.searchParams.set("redirect", request.nextUrl.pathname);
@@ -54,18 +51,14 @@ export async function middleware(request: NextRequest) {
       .eq("email", user.email)
       .single();
 
-    console.log("[Middleware] Admin check for", user.email, "- Found:", !!adminUser, "Active:", adminUser?.is_active, "Error:", error?.message);
-
     // Handle both error case (.single() not finding record) and user not active
     if (error || !adminUser || !adminUser.is_active) {
       // Not an admin - redirect to login with error
-      console.log("[Middleware] Not an admin, redirecting to login");
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
       url.searchParams.set("error", "unauthorized");
       return NextResponse.redirect(url);
     }
-    console.log("[Middleware] Admin verified, allowing access");
   }
 
   // Redirect logged-in admins away from login page
