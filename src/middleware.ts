@@ -45,13 +45,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check if user is in admin_users table
-    const { data: adminUser } = await supabase
+    const { data: adminUser, error } = await supabase
       .from("admin_users")
       .select("id, is_active")
       .eq("email", user.email)
       .single();
 
-    if (!adminUser || !adminUser.is_active) {
+    // Handle both error case (.single() not finding record) and user not active
+    if (error || !adminUser || !adminUser.is_active) {
       // Not an admin - redirect to login with error
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
@@ -62,13 +63,14 @@ export async function middleware(request: NextRequest) {
 
   // Redirect logged-in admins away from login page
   if (request.nextUrl.pathname === "/auth/login" && user) {
-    const { data: adminUser } = await supabase
+    const { data: adminUser, error } = await supabase
       .from("admin_users")
       .select("id, is_active")
       .eq("email", user.email)
       .single();
 
-    if (adminUser?.is_active) {
+    // Redirect only if admin exists and is active (error or not active = stay on login)
+    if (!error && adminUser?.is_active) {
       const redirect = request.nextUrl.searchParams.get("redirect") || "/admin";
       return NextResponse.redirect(new URL(redirect, request.url));
     }

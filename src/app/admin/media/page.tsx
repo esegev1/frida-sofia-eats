@@ -21,8 +21,6 @@ interface MediaItem {
  * Allows uploading, viewing, and managing media files in Supabase Storage
  */
 export default function MediaPage() {
-  // TEST: Log immediately on component render
-  console.log("🚀🚀🚀 MediaPage component rendering - code is deployed! FORCE REBUILD");
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -31,13 +29,11 @@ export default function MediaPage() {
   const supabase = createClient();
 
   const fetchMedia = useCallback(async () => {
-    console.log("Fetching media from Supabase...");
     const { data, error } = await supabase.storage
       .from("media-library")
       .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
     if (data && !error) {
-      console.log(`Found ${data.length} items in media library`);
       const items: MediaItem[] = data
         .filter((file) => file.name !== ".emptyFolderPlaceholder")
         .map((file) => ({
@@ -46,7 +42,6 @@ export default function MediaPage() {
           url: supabase.storage.from("media-library").getPublicUrl(file.name).data.publicUrl,
           created_at: file.created_at || "",
         }));
-      console.log(`Loaded ${items.length} media items`);
       setMediaItems(items);
     } else if (error) {
       console.error("Error fetching media:", error);
@@ -57,48 +52,45 @@ export default function MediaPage() {
     fetchMedia();
   }, [fetchMedia]);
 
-  async function uploadFile(file: File) {
+  async function uploadFile(file: File): Promise<boolean> {
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    console.log(`Generated filename: ${fileName}`);
 
-    console.log("Uploading to Supabase...");
     const { error } = await supabase.storage
       .from("media-library")
       .upload(fileName, file);
 
     if (error) {
-      console.error("Upload error:", error);
       alert("Failed to upload: " + error.message);
-      return;
+      return false;
     }
 
-    console.log(`Successfully uploaded: ${fileName}`);
     await fetchMedia();
+    return true;
   }
 
   /**
    * Handle file upload - processes each file and uploads to Supabase Storage
    * Validates file size (max 10MB) before uploading
+   * Stops on first error to prevent inconsistent state
    */
   async function handleUpload(files: FileList | null) {
-    console.log("handleUpload called with files:", files);
     if (!files || files.length === 0) {
-      console.log("No files selected");
       return;
     }
 
-    console.log(`Starting upload of ${files.length} file(s)`);
     setIsUploading(true);
     for (const file of Array.from(files)) {
-      console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
       if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} is too large. Max 10MB.`);
-        continue;
+        alert(`${file.name} is too large. Max 10MB. Upload stopped.`);
+        break; // Stop upload process on size validation error
       }
-      await uploadFile(file);
+      const uploadSuccess = await uploadFile(file);
+      if (!uploadSuccess) {
+        alert("Upload failed. Remaining files were not processed.");
+        break; // Stop upload process on upload error
+      }
     }
-    console.log("Upload complete");
     setIsUploading(false);
   }
 
@@ -140,11 +132,6 @@ export default function MediaPage() {
 
   return (
     <div className="max-w-6xl">
-      {/* TEST: Visual indicator showing new code is deployed */}
-      <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded text-green-800 text-sm">
-        ✓ New code deployed - CSS layout fixed
-      </div>
-
       {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
@@ -158,9 +145,7 @@ export default function MediaPage() {
         {/* Upload button - triggers hidden file input */}
         <Button
           onClick={() => {
-            console.log("Upload Files button clicked");
             const fileInput = document.getElementById("file-upload");
-            console.log("File input element:", fileInput);
             fileInput?.click();
           }}
           disabled={isUploading}
@@ -208,9 +193,7 @@ export default function MediaPage() {
           <Button
             variant="outline"
             onClick={() => {
-              console.log("Browse Files button clicked");
               const fileInput = document.getElementById("file-upload");
-              console.log("File input element:", fileInput);
               fileInput?.click();
             }}
             disabled={isUploading}
