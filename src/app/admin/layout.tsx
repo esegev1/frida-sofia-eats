@@ -14,8 +14,11 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-[#FFFBF7]">
       <AdminSidebar />
-      {/* Main content area - responsive padding/margin */}
-      <div className="pl-64 md:pl-64 pl-0 pt-0 md:pt-0 pt-16">
+      {/* Main content area - responsive padding/margin
+        Mobile: pl-0 (no left padding), pt-16 (top padding for mobile header)
+        Desktop (md:): pl-64 (padding for sidebar), pt-0 (no top padding needed)
+        Note: Classes must be ordered with mobile defaults first, then responsive overrides */}
+      <div className="pl-0 pt-16 md:pl-64 md:pt-0">
         <main className="p-4 md:p-8">{children}</main>
       </div>
     </div>

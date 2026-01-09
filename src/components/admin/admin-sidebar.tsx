@@ -85,9 +85,11 @@ export function AdminSidebar() {
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-cream-200 flex flex-col transition-transform duration-200",
-          "md:translate-x-0", // Always visible on desktop
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full", // Toggle on mobile
-          "md:top-0 top-16" // Below mobile header on mobile
+          // Mobile defaults: hidden sidebar, positioned below mobile header
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+          "top-16",
+          // Desktop: always visible, at top (no mobile header)
+          "md:translate-x-0 md:top-0"
         )}
       >
       {/* Logo */}
