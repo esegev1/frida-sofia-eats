@@ -144,3 +144,84 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// PUT - Update an existing recipe
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Recipe ID is required" }, { status: 400 });
+    }
+
+    const validationResult = recipeSchema.safeParse(updateData);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const data = validationResult.data;
+
+    // Calculate total time
+    const totalTime = (data.prep_time || 0) + (data.cook_time || 0) || null;
+
+    // Update recipe
+    const { data: recipe, error: recipeError } = await supabase
+      .from("recipes")
+      .update({
+        title: data.title,
+        slug: data.slug,
+        description: data.description || null,
+        intro_text: data.intro_text || null,
+        ingredients: data.ingredients,
+        instructions: data.instructions,
+        notes: data.notes || null,
+        featured_image_url: data.featured_image_url || null,
+        video_links: data.video_links || {},
+        prep_time_minutes: data.prep_time,
+        cook_time_minutes: data.cook_time,
+        total_time_minutes: totalTime,
+        servings: data.servings || null,
+        difficulty: data.difficulty || "easy",
+        status: data.status || "draft",
+        published_at:
+          data.status === "published" && !body.published_at
+            ? new Date().toISOString()
+            : body.published_at,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (recipeError) {
+      return NextResponse.json({ error: recipeError.message }, { status: 500 });
+    }
+
+    // Update category relationships
+    // First, delete existing relationships
+    await supabase.from("recipe_categories").delete().eq("recipe_id", id);
+
+    // Then insert new ones if provided
+    if (data.category_ids && data.category_ids.length > 0) {
+      const categoryRelations = data.category_ids.map((categoryId) => ({
+        recipe_id: id,
+        category_id: categoryId,
+      }));
+
+      await supabase.from("recipe_categories").insert(categoryRelations);
+    }
+
+    return NextResponse.json(recipe);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to update recipe" },
+      { status: 500 }
+    );
+  }
+}
