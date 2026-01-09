@@ -1,20 +1,69 @@
+"use client";
+
+// Prevent static prerendering - this is a dynamic admin page
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Eye, MoreVertical } from "lucide-react";
+import { Plus, Pencil, Eye, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
-// Placeholder - will be replaced with Supabase query
-const recipes: {
+interface Recipe {
   id: string;
   title: string;
   slug: string;
   status: "draft" | "published" | "archived";
-  category: string;
   published_at: string | null;
-}[] = [];
+  recipe_categories?: {
+    category_id: string;
+    categories: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  }[];
+}
 
 export default function RecipesPage() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchRecipes() {
+      try {
+        const response = await fetch("/api/recipes");
+        if (!response.ok) throw new Error("Failed to fetch recipes");
+        const data = await response.json();
+        setRecipes(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load recipes");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRecipes();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl">
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="max-w-6xl">
       {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
@@ -88,7 +137,11 @@ export default function RecipesPage() {
                       <p className="text-sm text-gray-500">/recipes/{recipe.slug}</p>
                     </td>
                     <td className="py-4 px-6 text-gray-600">
-                      {recipe.category}
+                      {recipe.recipe_categories && recipe.recipe_categories.length > 0
+                        ? recipe.recipe_categories
+                            .map((rc) => rc.categories.name)
+                            .join(", ")
+                        : "—"}
                     </td>
                     <td className="py-4 px-6">
                       <Badge
