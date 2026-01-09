@@ -48,6 +48,8 @@ interface InstructionStep {
 export default function NewRecipePage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -165,37 +167,93 @@ export default function NewRecipePage() {
 
   // Save handler
   const handleSave = async () => {
+    // Reset messages
+    setError(null);
+    setSuccess(false);
+
+    // Validation
+    if (!title.trim()) {
+      setError("Recipe title is required");
+      return;
+    }
+    if (!slug.trim()) {
+      setError("URL slug is required");
+      return;
+    }
+    if (!description.trim()) {
+      setError("Short description is required");
+      return;
+    }
+    if (ingredientGroups.some((g) => g.items.some((i) => !i.trim()))) {
+      setError("Please fill in all ingredient fields");
+      return;
+    }
+    if (instructions.some((i) => !i.text.trim())) {
+      setError("Please fill in all instruction fields");
+      return;
+    }
+
     setSaving(true);
-    // TODO: Save to Supabase
-    console.log({
-      title,
-      slug,
-      description,
-      introText,
-      notes,
-      featuredImage,
-      prepTime: prepTime ? parseInt(prepTime) : null,
-      cookTime: cookTime ? parseInt(cookTime) : null,
-      servings,
-      difficulty,
-      selectedCategories,
-      status,
-      ingredientGroups,
-      instructions,
-      videoLinks: {
-        youtube: youtubeUrl || undefined,
-        instagram: instagramUrl || undefined,
-        tiktok: tiktokUrl || undefined,
-      },
-    });
-    setTimeout(() => {
+    try {
+      // TODO: Save to Supabase
+      const recipeData = {
+        title,
+        slug,
+        description,
+        intro_text: introText,
+        notes,
+        featured_image_url: featuredImage,
+        prep_time: prepTime ? parseInt(prepTime) : null,
+        cook_time: cookTime ? parseInt(cookTime) : null,
+        servings,
+        difficulty,
+        category_ids: selectedCategories,
+        status,
+        ingredients: ingredientGroups,
+        instructions,
+        video_links: {
+          youtube: youtubeUrl || undefined,
+          instagram: instagramUrl || undefined,
+          tiktok: tiktokUrl || undefined,
+        },
+      };
+
+      console.log("📝 Saving recipe:", recipeData);
+
+      // Simulate save delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setSuccess(true);
+      setTimeout(() => {
+        // Uncomment when Supabase integration is ready:
+        // router.push("/admin/recipes");
+        setSuccess(false);
+      }, 2000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to save recipe"
+      );
+    } finally {
       setSaving(false);
-      // router.push("/admin/recipes");
-    }, 1000);
+    }
   };
 
   return (
     <div className="max-w-5xl">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-600">✓ Recipe saved successfully!</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
