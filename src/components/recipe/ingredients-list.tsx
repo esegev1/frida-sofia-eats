@@ -32,22 +32,22 @@ export function IngredientsList({ ingredients }: IngredientsListProps) {
               {group.group}
             </h3>
           )}
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {group.items.map((item, itemIndex) => {
               const itemKey = `${groupIndex}-${itemIndex}`;
               const isChecked = checkedItems.has(itemKey);
               return (
                 <li key={itemKey}>
-                  <label className="flex items-start gap-3 cursor-pointer group">
+                  <label className="flex items-start gap-3 cursor-pointer group py-1 -mx-2 px-2 rounded hover:bg-cream-50 transition-colors">
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => toggleItem(itemKey)}
-                      className="mt-1 h-4 w-4 rounded border-gray-300 text-terracotta-500 focus:ring-terracotta-500"
+                      className="mt-0.5 h-5 w-5 sm:h-4 sm:w-4 rounded border-gray-300 text-terracotta-500 focus:ring-terracotta-500 flex-shrink-0"
                     />
                     <span
                       className={cn(
-                        "text-gray-700 transition-colors",
+                        "text-gray-700 transition-colors flex-1 leading-relaxed",
                         isChecked && "line-through text-gray-400"
                       )}
                     >

@@ -21,19 +21,11 @@ import {
 import { cn } from "@/lib/utils";
 import slugify from "slugify";
 
-// Categories - will be fetched from Supabase
-const availableCategories = [
-  { id: "1", name: "Mains", slug: "mains" },
-  { id: "2", name: "Pasta", slug: "pasta" },
-  { id: "3", name: "Chicken", slug: "chicken" },
-  { id: "4", name: "Beef", slug: "beef" },
-  { id: "5", name: "Seafood", slug: "seafood" },
-  { id: "6", name: "Soups", slug: "soups" },
-  { id: "7", name: "Appetizers", slug: "appetizers" },
-  { id: "8", name: "Side Dishes", slug: "side-dishes" },
-  { id: "9", name: "Breakfast", slug: "breakfast" },
-  { id: "10", name: "Desserts", slug: "desserts" },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface IngredientGroup {
   id: string;
@@ -55,6 +47,7 @@ export default function EditRecipePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -85,13 +78,23 @@ export default function EditRecipePage() {
     { id: "1", text: "" },
   ]);
 
-  // Load recipe data on mount
+  // Load recipe data and categories on mount
   useEffect(() => {
-    async function loadRecipe() {
+    async function loadData() {
       try {
-        const response = await fetch(`/api/recipes/${recipeId}`);
-        if (!response.ok) throw new Error("Failed to load recipe");
-        const recipe = await response.json();
+        // Fetch both recipe and categories in parallel
+        const [recipeResponse, categoriesResponse] = await Promise.all([
+          fetch(`/api/recipes/${recipeId}`),
+          fetch("/api/categories"),
+        ]);
+
+        if (!recipeResponse.ok) throw new Error("Failed to load recipe");
+        if (!categoriesResponse.ok) throw new Error("Failed to load categories");
+
+        const recipe = await recipeResponse.json();
+        const categories = await categoriesResponse.json();
+
+        setAvailableCategories(categories);
 
         // Populate form fields
         setTitle(recipe.title);
@@ -133,7 +136,7 @@ export default function EditRecipePage() {
         setLoading(false);
       }
     }
-    loadRecipe();
+    loadData();
   }, [recipeId]);
 
   // Auto-generate slug from title

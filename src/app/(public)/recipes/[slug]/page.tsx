@@ -249,21 +249,10 @@ export default async function RecipePage({
           />
         </div>
 
-        {/* Video Links */}
-        {(recipe.video_links.instagram || recipe.video_links.youtube || recipe.video_links.tiktok) && (
+        {/* Video Links (YouTube and TikTok only - Instagram is in action bar) */}
+        {(recipe.video_links.youtube || recipe.video_links.tiktok) && (
           <div className="flex flex-wrap gap-3 mb-10">
             <span className="text-sm font-medium text-gray-700">Watch the video:</span>
-            {recipe.video_links.instagram && (
-              <a
-                href={recipe.video_links.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-full hover:opacity-90 transition-opacity"
-              >
-                <Instagram className="h-4 w-4" />
-                Instagram
-              </a>
-            )}
             {recipe.video_links.youtube && (
               <a
                 href={recipe.video_links.youtube}
@@ -376,14 +365,83 @@ export default async function RecipePage({
           averageRating={recipe.rating.average}
           reviewCount={recipe.rating.count}
         />
+      </article>
+
+      {/* More Recipes Section - Keep users engaged */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-cream-200">
+        <div className="mb-8">
+          <h2 className="text-2xl lg:text-3xl font-display font-bold text-gray-900 mb-2">
+            More Recipes You'll Love
+          </h2>
+          <p className="text-gray-600">Keep the inspiration going</p>
+        </div>
+
+        {/* Related Recipes Grid - 2 col mobile, 3 col desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+          {/* Demo related recipes - in production, filter by same category or tags */}
+          {[
+            {
+              slug: "shrimp-tomato-pasta",
+              title: "Shrimp Tomato Pasta",
+              image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&h=400&fit=crop",
+              time: 25,
+              category: "Pasta"
+            },
+            {
+              slug: "40-clove-chicken",
+              title: "40 Clove Chicken",
+              image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=600&h=400&fit=crop",
+              time: 60,
+              category: "Chicken"
+            },
+            {
+              slug: "herb-crusted-salmon",
+              title: "Herb Crusted Salmon",
+              image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop",
+              time: 25,
+              category: "Seafood"
+            }
+          ].map((related) => (
+            <Link
+              key={related.slug}
+              href={`/recipes/${related.slug}`}
+              className="group"
+            >
+              <article>
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-md mb-3">
+                  <Image
+                    src={related.image}
+                    alt={related.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-2 sm:py-1 bg-white/95 backdrop-blur-sm text-gray-700 text-sm sm:text-xs font-medium rounded-full shadow-sm">
+                      <Clock className="h-4 w-4 sm:h-3 sm:w-3" />
+                      {related.time} min
+                    </span>
+                  </div>
+                </div>
+                <div className="px-1">
+                  <span className="text-terracotta-600 text-xs font-medium uppercase tracking-wide">
+                    {related.category}
+                  </span>
+                  <h3 className="font-display font-semibold text-base text-gray-900 mt-1 group-hover:text-terracotta-600 transition-colors">
+                    {related.title}
+                  </h3>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
 
         {/* Back to Recipes */}
-        <div className="text-center pt-8 border-t border-cream-200 mt-12">
-          <Button variant="outline" asChild>
-            <Link href="/recipes">← Back to All Recipes</Link>
+        <div className="text-center">
+          <Button variant="outline" size="lg" asChild>
+            <Link href="/recipes">← Browse All Recipes</Link>
           </Button>
         </div>
-      </article>
+      </section>
     </>
   );
 }

@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Printer, Copy, Share2, Check } from "lucide-react";
+import { Printer, Copy, Share2, Check, Instagram } from "lucide-react";
 
 interface RecipeActionsProps {
   recipe: {
     title: string;
     ingredients: { group: string; items: string[] }[];
     instructions: { step: number; text: string }[];
+    video_links?: {
+      instagram?: string;
+      youtube?: string;
+      tiktok?: string;
+    };
   };
 }
 
@@ -69,28 +74,47 @@ export function RecipeActions({ recipe }: RecipeActionsProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 no-print">
-      <Button variant="outline" size="sm" onClick={handlePrint}>
-        <Printer className="h-4 w-4 mr-2" />
-        Print
+    <div className="flex flex-wrap gap-2 sm:gap-2 no-print">
+      <Button variant="outline" size="sm" onClick={handlePrint} className="flex-1 sm:flex-none min-w-[100px] sm:min-w-0">
+        <Printer className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">Print</span>
       </Button>
-      <Button variant="outline" size="sm" onClick={handleCopy}>
+      <Button variant="outline" size="sm" onClick={handleCopy} className="flex-1 sm:flex-none min-w-[120px] sm:min-w-0">
         {copied ? (
           <>
-            <Check className="h-4 w-4 mr-2 text-green-600" />
-            Copied!
+            <Check className="h-4 w-4 sm:mr-2 text-green-600" />
+            <span className="hidden sm:inline">Copied!</span>
           </>
         ) : (
           <>
-            <Copy className="h-4 w-4 mr-2" />
-            Copy Recipe
+            <Copy className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Copy Recipe</span>
           </>
         )}
       </Button>
-      <Button variant="outline" size="sm" onClick={handleShare}>
-        <Share2 className="h-4 w-4 mr-2" />
-        Share
+      <Button variant="outline" size="sm" onClick={handleShare} className="flex-1 sm:flex-none min-w-[100px] sm:min-w-0">
+        <Share2 className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">Share</span>
       </Button>
+      {recipe.video_links?.instagram && (
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="flex-1 sm:flex-none min-w-[120px] sm:min-w-0 border-pink-200 hover:bg-pink-50 hover:border-pink-300"
+        >
+          <a
+            href={recipe.video_links.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Instagram className="h-4 w-4 sm:mr-2 text-pink-600" />
+            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-medium hidden sm:inline">
+              Instagram
+            </span>
+          </a>
+        </Button>
+      )}
     </div>
   );
 }

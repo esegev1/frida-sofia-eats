@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,23 +16,16 @@ import {
   Save,
   Eye,
   Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import slugify from "slugify";
 
-// Categories - will be fetched from Supabase
-const availableCategories = [
-  { id: "1", name: "Mains", slug: "mains" },
-  { id: "2", name: "Pasta", slug: "pasta" },
-  { id: "3", name: "Chicken", slug: "chicken" },
-  { id: "4", name: "Beef", slug: "beef" },
-  { id: "5", name: "Seafood", slug: "seafood" },
-  { id: "6", name: "Soups", slug: "soups" },
-  { id: "7", name: "Appetizers", slug: "appetizers" },
-  { id: "8", name: "Side Dishes", slug: "side-dishes" },
-  { id: "9", name: "Breakfast", slug: "breakfast" },
-  { id: "10", name: "Desserts", slug: "desserts" },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface IngredientGroup {
   id: string;
@@ -50,6 +43,8 @@ export default function NewRecipePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -79,6 +74,23 @@ export default function NewRecipePage() {
   const [instructions, setInstructions] = useState<InstructionStep[]>([
     { id: "1", text: "" },
   ]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        setAvailableCategories(data);
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {

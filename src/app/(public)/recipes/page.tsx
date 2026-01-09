@@ -130,21 +130,25 @@ export default function RecipesPage() {
         </p>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
-        {CATEGORIES.map((category) => (
-          <Link
-            key={category.slug}
-            href={category.slug ? `/category/${category.slug}` : "/recipes"}
-            className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-cream-100 text-gray-700 hover:bg-terracotta-100 hover:text-terracotta-700"
-          >
-            {category.name}
-          </Link>
-        ))}
+      {/* Category Filter - with scroll hint */}
+      <div className="relative mb-8">
+        <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+          {CATEGORIES.map((category) => (
+            <Link
+              key={category.slug}
+              href={category.slug ? `/category/${category.slug}` : "/recipes"}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors bg-cream-100 text-gray-700 hover:bg-terracotta-100 hover:text-terracotta-700 snap-start"
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+        {/* Gradient overlay to indicate scrollability */}
+        <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#FFFBF7] to-transparent pointer-events-none lg:hidden" />
       </div>
 
-      {/* Recipe Grid - Responsive: 2 cols mobile, 3 cols tablet, 4 cols desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
+      {/* Recipe Grid - Single column mobile for better readability */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-5 lg:gap-6">
         {recipes.map((recipe) => (
           <Link
             key={recipe.id}
@@ -159,16 +163,16 @@ export default function RecipesPage() {
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                {/* Time badge */}
+                {/* Time badge - larger touch target on mobile */}
                 <div className="absolute top-3 right-3">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/95 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full shadow-sm">
-                    <Clock className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-2 sm:py-1 bg-white/95 backdrop-blur-sm text-gray-700 text-sm sm:text-xs font-medium rounded-full shadow-sm">
+                    <Clock className="h-4 w-4 sm:h-3 sm:w-3" />
                     {recipe.total_time_minutes} min
                   </span>
                 </div>
                 {/* Difficulty badge */}
                 <div className="absolute top-3 left-3">
-                  <Badge variant="secondary" className="bg-white/95 backdrop-blur-sm capitalize">
+                  <Badge variant="secondary" className="bg-white/95 backdrop-blur-sm capitalize text-xs">
                     {recipe.difficulty}
                   </Badge>
                 </div>
@@ -185,10 +189,10 @@ export default function RecipesPage() {
                     </span>
                   ))}
                 </div>
-                <h2 className="font-display font-semibold text-gray-900 group-hover:text-terracotta-600 transition-colors line-clamp-2">
+                <h2 className="font-display font-semibold text-base sm:text-base text-gray-900 group-hover:text-terracotta-600 transition-colors line-clamp-2">
                   {recipe.title}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1 line-clamp-2 hidden sm:block">
+                <p className="text-gray-600 text-sm mt-1 line-clamp-2">
                   {recipe.description}
                 </p>
               </div>

@@ -229,33 +229,37 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Category Cards */}
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:overflow-visible scrollbar-hide">
-              {categories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  className="group flex-shrink-0 w-[160px] sm:w-auto"
-                >
-                  <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md">
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="font-display font-semibold text-white text-lg">
-                        {category.name}
-                      </h3>
-                      <p className="text-white/80 text-sm">
-                        {category.count} recipes
-                      </p>
+            {/* Category Cards - with scroll indicator gradient on mobile */}
+            <div className="relative">
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:overflow-visible scrollbar-hide snap-x snap-mandatory">
+                {categories.map((category) => (
+                  <Link
+                    key={category.slug}
+                    href={`/category/${category.slug}`}
+                    className="group flex-shrink-0 w-[160px] sm:w-auto snap-start"
+                  >
+                    <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="font-display font-semibold text-white text-lg">
+                          {category.name}
+                        </h3>
+                        <p className="text-white/80 text-sm">
+                          {category.count} recipes
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
+              {/* Gradient overlay to indicate scrollability - only visible on mobile */}
+              <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
             </div>
 
             <Link
@@ -289,8 +293,8 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Recipe Grid - 4 columns on large screens */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            {/* Recipe Grid - Single column mobile for better readability, 4 columns desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
               {latestRecipes.map((recipe) => (
                 <Link
                   key={recipe.id}
@@ -298,29 +302,29 @@ export default function Home() {
                   className="group"
                 >
                   <article className="h-full">
-                    <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-md mb-3">
+                    <div className="relative aspect-[4/3] sm:aspect-[4/3] rounded-xl overflow-hidden shadow-md mb-3">
                       <Image
                         src={recipe.image}
                         alt={recipe.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                      {/* Time badge */}
+                      {/* Time badge - larger on mobile */}
                       <div className="absolute top-3 right-3">
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/95 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full shadow-sm">
-                          <Clock className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-2 sm:py-1 bg-white/95 backdrop-blur-sm text-gray-700 text-sm sm:text-xs font-medium rounded-full shadow-sm">
+                          <Clock className="h-4 w-4 sm:h-3 sm:w-3" />
                           {recipe.totalTime} min
                         </span>
                       </div>
                     </div>
                     <div className="px-1">
-                      <span className="text-terracotta-600 text-xs font-medium uppercase tracking-wide">
+                      <span className="text-terracotta-600 text-xs sm:text-xs font-medium uppercase tracking-wide">
                         {recipe.category}
                       </span>
-                      <h3 className="font-display font-semibold text-gray-900 mt-1 group-hover:text-terracotta-600 transition-colors line-clamp-2">
+                      <h3 className="font-display font-semibold text-base sm:text-base text-gray-900 mt-1 group-hover:text-terracotta-600 transition-colors line-clamp-2">
                         {recipe.title}
                       </h3>
-                      <p className="text-gray-600 text-sm mt-1 line-clamp-2 hidden sm:block">
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">
                         {recipe.description}
                       </p>
                     </div>
@@ -343,33 +347,60 @@ export default function Home() {
         {/* About Section - Warm & Personal */}
         <section className="py-16 lg:py-20 bg-terracotta-50/50">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <p className="text-terracotta-600 font-medium text-sm tracking-wide uppercase mb-4">
-                About Frida Sofia Eats
-              </p>
-              <h2 className="text-3xl lg:text-4xl font-display font-bold text-gray-900 mb-6">
-                Cooking is my love language
-              </h2>
-              <p className="text-gray-600 text-lg leading-relaxed mb-8">
-                Hi, I'm Frida! The kitchen is my happy place—where I get to be
-                creative, unwind, and connect with the people I love. I believe
-                that great food doesn't have to be complicated. Here you'll find
-                recipes that actually work in real life, designed for busy nights
-                and real kitchens.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button asChild>
-                  <Link href="/about">More About Me</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a
-                    href="https://www.instagram.com/fridasofiaeats/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Follow on Instagram
-                  </a>
-                </Button>
+            <div className="max-w-5xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+                {/* Photo */}
+                <div className="order-2 lg:order-1">
+                  <div className="relative aspect-[4/5] max-w-md mx-auto lg:ml-auto lg:mr-0 rounded-2xl overflow-hidden shadow-xl">
+                    {/* Placeholder for Frida's photo */}
+                    <div className="absolute inset-0 bg-terracotta-200 flex items-center justify-center">
+                      <p className="text-terracotta-600 font-medium text-center px-4">
+                        Add Frida's Photo Here
+                        <br />
+                        <span className="text-sm">(Aspect ratio: 4:5)</span>
+                      </p>
+                    </div>
+                    {/* Uncomment when ready to add photo:
+                    <Image
+                      src="/images/frida-profile.jpg"
+                      alt="Frida Sofia"
+                      fill
+                      className="object-cover"
+                    />
+                    */}
+                  </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="order-1 lg:order-2 text-center lg:text-left">
+                  <p className="text-terracotta-600 font-medium text-sm tracking-wide uppercase mb-4">
+                    About Frida Sofia Eats
+                  </p>
+                  <h2 className="text-3xl lg:text-4xl font-display font-bold text-gray-900 mb-6">
+                    Cooking is my love language
+                  </h2>
+                  <p className="text-gray-600 text-lg leading-relaxed mb-8">
+                    Hi, I'm Frida! The kitchen is my happy place—where I get to be
+                    creative, unwind, and connect with the people I love. I believe
+                    that great food doesn't have to be complicated. Here you'll find
+                    recipes that actually work in real life, designed for busy nights
+                    and real kitchens.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <Button asChild>
+                      <Link href="/about">More About Me</Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <a
+                        href="https://www.instagram.com/fridasofiaeats/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Follow on Instagram
+                      </a>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
