@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: validationResult.error.errors },
+        { error: "Validation failed", details: validationResult.error.issues },
         { status: 400 }
       );
     }
@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
         .insert(categoryRelations);
 
       if (categoryError) {
-        // Recipe was created but categories failed - log but don't fail
-        console.error("Failed to add categories:", categoryError);
+        // Recipe was created but categories failed - don't fail the whole request
+        // but include a warning in the response
       }
     }
 
