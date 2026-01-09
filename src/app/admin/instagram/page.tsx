@@ -1,5 +1,8 @@
 "use client";
 
+// Prevent static prerendering - this is a dynamic admin page
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

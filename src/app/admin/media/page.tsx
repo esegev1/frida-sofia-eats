@@ -1,5 +1,8 @@
 "use client";
 
+// Prevent static prerendering - this is a dynamic admin page that needs runtime environment variables
+export const dynamic = "force-dynamic";
+
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
