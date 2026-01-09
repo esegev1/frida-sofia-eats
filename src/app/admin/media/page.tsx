@@ -21,6 +21,10 @@ interface MediaItem {
  * Allows uploading, viewing, and managing media files in Supabase Storage
  */
 export default function MediaPage() {
+  // Temporary: Log to verify new code is deployed
+  if (typeof window !== "undefined") {
+    console.log("✅ MediaPage component loaded - new code is deployed");
+  }
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -145,7 +149,9 @@ export default function MediaPage() {
         {/* Upload button - triggers hidden file input */}
         <Button
           onClick={() => {
+            console.log("📤 Upload Files button clicked");
             const fileInput = document.getElementById("file-upload");
+            console.log("File input element found:", !!fileInput);
             fileInput?.click();
           }}
           disabled={isUploading}
@@ -166,7 +172,10 @@ export default function MediaPage() {
           accept="image/*"
           multiple
           className="hidden"
-          onChange={(e) => handleUpload(e.target.files)}
+          onChange={(e) => {
+            console.log("📁 Files selected:", e.target.files?.length);
+            handleUpload(e.target.files);
+          }}
         />
       </div>
 
@@ -193,7 +202,9 @@ export default function MediaPage() {
           <Button
             variant="outline"
             onClick={() => {
+              console.log("🔍 Browse Files button clicked");
               const fileInput = document.getElementById("file-upload");
+              console.log("File input element found:", !!fileInput);
               fileInput?.click();
             }}
             disabled={isUploading}
