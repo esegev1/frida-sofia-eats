@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, Image as ImageIcon, Trash2, Copy, Loader2, Check } from "lucide-react";
@@ -21,12 +21,7 @@ export default function MediaPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
-  // Fetch media on load
-  useState(() => {
-    fetchMedia();
-  });
-
-  async function fetchMedia() {
+  const fetchMedia = useCallback(async () => {
     const { data, error } = await supabase.storage
       .from("media-library")
       .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
@@ -35,14 +30,20 @@ export default function MediaPage() {
       const items: MediaItem[] = data
         .filter((file) => file.name !== ".emptyFolderPlaceholder")
         .map((file) => ({
-          id: file.id,
+          id: file.id || file.name,
           name: file.name,
           url: supabase.storage.from("media-library").getPublicUrl(file.name).data.publicUrl,
-          created_at: file.created_at,
+          created_at: file.created_at || "",
         }));
       setMediaItems(items);
+    } else if (error) {
+      console.error("Error fetching media:", error);
     }
-  }
+  }, [supabase.storage]);
+
+  useEffect(() => {
+    fetchMedia();
+  }, [fetchMedia]);
 
   async function uploadFile(file: File) {
     const fileExt = file.name.split(".").pop();
@@ -98,6 +99,7 @@ export default function MediaPage() {
     e.preventDefault();
     setIsDragging(false);
     handleUpload(e.dataTransfer.files);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
