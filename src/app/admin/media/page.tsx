@@ -130,8 +130,9 @@ export default function MediaPage() {
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          Upload Files
+          {/* Upload Files */}
         </Button>
+        <label htmlFor="file-upload" className="sr-only">Upload files</label>
         <input
           ref={fileInputRef}
           type="file"
