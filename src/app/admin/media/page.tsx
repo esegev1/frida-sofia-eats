@@ -22,7 +22,7 @@ interface MediaItem {
  */
 export default function MediaPage() {
   // TEST: Log immediately on component render
-  console.log("🚀 MediaPage component rendering - code is deployed!");
+  console.log("🚀🚀🚀 MediaPage component rendering - code is deployed! FORCE REBUILD");
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
