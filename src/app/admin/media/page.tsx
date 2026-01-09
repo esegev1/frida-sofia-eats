@@ -21,6 +21,9 @@ interface MediaItem {
  * Allows uploading, viewing, and managing media files in Supabase Storage
  */
 export default function MediaPage() {
+  // TEST: Log immediately on component render
+  console.log("🚀 MediaPage component rendering - code is deployed!");
+
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
