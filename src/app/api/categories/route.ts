@@ -32,10 +32,16 @@ export async function GET() {
     }
 
     // Transform to include recipe count
-    const categoriesWithCounts = categories?.map((cat) => ({
-      ...cat,
-      recipeCount: cat.recipe_categories?.[0]?.count || 0,
-    }));
+    const categoriesWithCounts = categories?.map((cat) => {
+      const { recipe_categories, ...categoryData } = cat as {
+        recipe_categories?: { count: number }[];
+        [key: string]: unknown;
+      };
+      return {
+        ...categoryData,
+        recipeCount: recipe_categories?.[0]?.count || 0,
+      };
+    });
 
     return NextResponse.json(categoriesWithCounts);
   } catch (error) {
