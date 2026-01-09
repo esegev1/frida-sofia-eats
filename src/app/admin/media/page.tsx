@@ -25,11 +25,13 @@ export default function MediaPage() {
   const supabase = createClient();
 
   const fetchMedia = useCallback(async () => {
+    console.log("Fetching media from Supabase...");
     const { data, error } = await supabase.storage
       .from("media-library")
       .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
     if (data && !error) {
+      console.log(`Found ${data.length} items in media library`);
       const items: MediaItem[] = data
         .filter((file) => file.name !== ".emptyFolderPlaceholder")
         .map((file) => ({
@@ -38,6 +40,7 @@ export default function MediaPage() {
           url: supabase.storage.from("media-library").getPublicUrl(file.name).data.publicUrl,
           created_at: file.created_at || "",
         }));
+      console.log(`Loaded ${items.length} media items`);
       setMediaItems(items);
     } else if (error) {
       console.error("Error fetching media:", error);
@@ -51,7 +54,9 @@ export default function MediaPage() {
   async function uploadFile(file: File) {
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    console.log(`Generated filename: ${fileName}`);
 
+    console.log("Uploading to Supabase...");
     const { error } = await supabase.storage
       .from("media-library")
       .upload(fileName, file);
@@ -62,6 +67,7 @@ export default function MediaPage() {
       return;
     }
 
+    console.log(`Successfully uploaded: ${fileName}`);
     await fetchMedia();
   }
 
@@ -70,16 +76,23 @@ export default function MediaPage() {
    * Validates file size (max 10MB) before uploading
    */
   async function handleUpload(files: FileList | null) {
-    if (!files || files.length === 0) return;
+    console.log("handleUpload called with files:", files);
+    if (!files || files.length === 0) {
+      console.log("No files selected");
+      return;
+    }
 
+    console.log(`Starting upload of ${files.length} file(s)`);
     setIsUploading(true);
     for (const file of Array.from(files)) {
+      console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
       if (file.size > 10 * 1024 * 1024) {
         alert(`${file.name} is too large. Max 10MB.`);
         continue;
       }
       await uploadFile(file);
     }
+    console.log("Upload complete");
     setIsUploading(false);
   }
 
