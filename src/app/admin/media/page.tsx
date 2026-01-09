@@ -146,7 +146,12 @@ export default function MediaPage() {
         </div>
         {/* Upload button - triggers hidden file input */}
         <Button
-          onClick={() => document.getElementById("file-upload")?.click()}
+          onClick={() => {
+            console.log("Upload Files button clicked");
+            const fileInput = document.getElementById("file-upload");
+            console.log("File input element:", fileInput);
+            fileInput?.click();
+          }}
           disabled={isUploading}
           className="sm:self-start"
         >
@@ -191,7 +196,12 @@ export default function MediaPage() {
           {/* Browse button - opens file dialog */}
           <Button
             variant="outline"
-            onClick={() => document.getElementById("file-upload")?.click()}
+            onClick={() => {
+              console.log("Browse Files button clicked");
+              const fileInput = document.getElementById("file-upload");
+              console.log("File input element:", fileInput);
+              fileInput?.click();
+            }}
             disabled={isUploading}
           >
             Browse Files
