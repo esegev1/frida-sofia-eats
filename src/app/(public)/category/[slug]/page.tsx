@@ -161,6 +161,17 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Category Page
+ * Fully responsive design for browsing recipes by category
+ * - Container: Responsive padding with max-width constraint
+ * - Hero Image: Maintains aspect ratio (3:1) on all screen sizes
+ * - Hero Text Overlay: Responsive font sizes and padding
+ * - Category Filter: Horizontal scroll on all screen sizes (mobile-friendly)
+ * - Recipe Grid: 2 columns on mobile, 4 columns on desktop (same as listing)
+ * - Description: Hidden on mobile, visible on sm: and larger
+ * - Responsive Spacing: Gaps and padding adjust with breakpoints
+ */
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
 
@@ -229,7 +240,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         ))}
       </div>
 
-      {/* Recipe Grid */}
+      {/* Recipe Grid - Responsive columns: 2 on mobile, 4 on desktop */}
       {recipes.length > 0 ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
           {recipes.map((recipe) => (

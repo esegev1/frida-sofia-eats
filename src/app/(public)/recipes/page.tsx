@@ -105,6 +105,16 @@ const CATEGORIES = [
   { name: "Breakfast", slug: "breakfast" },
 ];
 
+/**
+ * Recipes Listing Page
+ * Fully responsive design optimized for mobile, tablet, and desktop
+ * - Container: Responsive padding with max-width constraint
+ * - Header: Responsive text sizing with sm: and lg: breakpoints
+ * - Category Filter: Horizontal scroll on all screen sizes (mobile-friendly)
+ * - Recipe Grid: 2 columns on mobile, 4 columns on desktop
+ * - Description: Hidden on mobile to save space, visible on sm: and larger
+ * - Spacing: Responsive gaps and padding throughout
+ */
 export default function RecipesPage() {
   const recipes = DEMO_RECIPES;
 
@@ -133,7 +143,7 @@ export default function RecipesPage() {
         ))}
       </div>
 
-      {/* Recipe Grid - 4 columns */}
+      {/* Recipe Grid - Responsive columns: 2 on mobile, 4 on desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {recipes.map((recipe) => (
           <Link

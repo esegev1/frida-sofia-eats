@@ -99,9 +99,20 @@ const DEMO_RECIPES = [
   },
 ];
 
+/**
+ * Search Page
+ * Fully responsive search interface for finding recipes
+ * - Container: Responsive padding with max-width constraint
+ * - Search Input: Full-width responsive design with icons
+ * - Title: Responsive font sizes (text-3xl → text-4xl)
+ * - Results Grid: 2 columns on mobile, 4 columns on desktop
+ * - Suggestions: Flex-wrapped buttons that adapt to screen size
+ * - Responsive Text: Hidden descriptions on mobile, visible on sm: and larger
+ */
 export default function SearchPage() {
   const [query, setQuery] = useState("");
 
+  // Memoized search filter to avoid recalculating on every render
   const filteredRecipes = useMemo(() => {
     if (!query.trim()) {
       return [];
@@ -155,7 +166,7 @@ export default function SearchPage() {
         )}
       </div>
 
-      {/* Search Results */}
+      {/* Search Results - Responsive grid: 2 columns on mobile, 4 on desktop */}
       {query ? (
         filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">

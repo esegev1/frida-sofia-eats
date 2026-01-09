@@ -4,6 +4,15 @@ import { Header, Footer } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Clock, ArrowRight } from "lucide-react";
 
+/**
+ * Homepage Component
+ * Fully responsive design optimized for mobile, tablet, and desktop
+ * - Hero: Single column on mobile, 2-column layout on desktop
+ * - Categories: Horizontal scroll on mobile, grid on tablet/desktop
+ * - Recipes: 2 columns on mobile, 4 on desktop
+ * - Text: Responsive font sizes with sm:, lg:, and xl: breakpoints
+ */
+
 // Placeholder images - using Unsplash food images for demo
 const PLACEHOLDER_IMAGES = {
   hero: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=800&fit=crop",

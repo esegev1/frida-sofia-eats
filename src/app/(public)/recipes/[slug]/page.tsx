@@ -131,6 +131,17 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Recipe Detail Page
+ * Fully responsive design for reading recipes on any device
+ * - Article: Responsive padding with max-width constraint
+ * - Title: Responsive font sizes (text-3xl → text-4xl → text-5xl)
+ * - Meta Info: Responsive gaps and flexible wrapping
+ * - Featured Image: Maintains aspect ratio on all screen sizes
+ * - Content Grid: Single column on mobile, 3-column on desktop (ingredients sidebar)
+ * - Time Breakdown: Always 3 columns, remains readable on all sizes
+ * - Responsive Text: Hidden descriptions on mobile, visible on sm: and larger
+ */
 export default async function RecipePage({
   params,
 }: {
@@ -292,7 +303,7 @@ export default async function RecipePage({
         {/* Ad Slot - After Intro */}
         <AdSlot id="recipe-after-intro" size="horizontal" className="mb-10" />
 
-        {/* Recipe Content Grid */}
+        {/* Recipe Content Grid - Single column on mobile, 3-column on desktop */}
         <div className="grid lg:grid-cols-3 gap-8 mb-10">
           {/* Ingredients - Sidebar on desktop */}
           <div className="lg:col-span-1">
