@@ -140,6 +140,11 @@ export default function MediaPage() {
 
   return (
     <div className="max-w-6xl">
+      {/* TEST: Visual indicator showing new code is deployed */}
+      <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded text-green-800 text-sm">
+        ✓ New code deployed - CSS layout fixed
+      </div>
+
       {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
