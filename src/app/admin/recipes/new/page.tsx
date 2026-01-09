@@ -283,9 +283,31 @@ export default function NewRecipePage() {
                 <p className="text-sm text-gray-600 mb-2">
                   Drag and drop an image, or click to browse
                 </p>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const fileInput = document.getElementById("featured-image-upload");
+                    fileInput?.click();
+                  }}
+                >
                   Upload Image
                 </Button>
+                {/* Hidden file input for featured image */}
+                <input
+                  id="featured-image-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // In a real app, you'd upload to Supabase Storage here
+                      // For now, just store the file name
+                      setFeaturedImage(file.name);
+                    }
+                  }}
+                />
               </div>
               {featuredImage && (
                 <div className="mt-4">

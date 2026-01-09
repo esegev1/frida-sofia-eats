@@ -6,7 +6,9 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/admin";
 
-  console.log("[Callback] Code:", !!code, "Next redirect:", next);
+  console.log("[Callback] Full URL:", request.url);
+  console.log("[Callback] Origin:", origin);
+  console.log("[Callback] Code:", !!code, "Next param:", next);
 
   if (code) {
     const supabase = await createClient();
@@ -15,8 +17,11 @@ export async function GET(request: Request) {
     console.log("[Callback] Exchange error:", error?.message);
 
     if (!error) {
-      const redirectUrl = `${origin}${next}`;
-      console.log("[Callback] Redirecting to:", redirectUrl);
+      // Make sure next is valid and starts with /
+      const safeNext = next && next.startsWith("/") ? next : "/admin";
+      const redirectUrl = `${origin}${safeNext}`;
+      console.log("[Callback] Safe next:", safeNext);
+      console.log("[Callback] Full redirect URL:", redirectUrl);
       return NextResponse.redirect(redirectUrl);
     }
   }
