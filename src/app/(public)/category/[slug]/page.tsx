@@ -240,9 +240,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         ))}
       </div>
 
-      {/* Recipe Grid - Responsive columns: 2 on mobile, 4 on desktop */}
+      {/* Recipe Grid - Responsive: 2 cols mobile, 3 cols tablet, 4 cols desktop */}
       {recipes.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
           {recipes.map((recipe) => (
             <Link
               key={recipe.id}

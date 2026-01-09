@@ -201,8 +201,8 @@ export default async function RecipePage({
             {recipe.title}
           </h1>
 
-          {/* Description */}
-          <p className="text-lg text-gray-600 mb-6">{recipe.description}</p>
+          {/* Description - Responsive text sizing */}
+          <p className="text-base sm:text-lg text-gray-600 mb-6">{recipe.description}</p>
 
           {/* Meta Info */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-600 mb-6">
@@ -334,8 +334,8 @@ export default async function RecipePage({
           </div>
         </div>
 
-        {/* Time Breakdown */}
-        <div className="grid grid-cols-3 gap-4 mb-10">
+        {/* Time Breakdown - Responsive: 1 col mobile, 3 cols desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
           {recipe.prep_time_minutes && (
             <Card className="p-4 text-center">
               <p className="text-sm text-gray-500 mb-1">Prep Time</p>

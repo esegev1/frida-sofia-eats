@@ -121,10 +121,10 @@ export default function MediaPage() {
 
   return (
     <div className="max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">
             Media Library
           </h1>
           <p className="text-gray-600 mt-1">
@@ -135,6 +135,7 @@ export default function MediaPage() {
         <Button
           onClick={() => document.getElementById("file-upload")?.click()}
           disabled={isUploading}
+          className="sm:self-start"
         >
           {isUploading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -161,14 +162,14 @@ export default function MediaPage() {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-xl p-8 sm:p-12 text-center transition-colors ${
             isDragging
               ? "border-terracotta-500 bg-terracotta-50"
               : "border-cream-300"
           }`}
         >
-          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Upload className="h-10 sm:h-12 w-10 sm:w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
             Drag and drop files here
           </h3>
           <p className="text-gray-600 mb-4">
@@ -204,9 +205,9 @@ export default function MediaPage() {
         </Card>
       )}
 
-      {/* Media Grid */}
+      {/* Media Grid - Responsive: 2 cols mobile, 3 cols tablet, 4 cols desktop, 6 cols large */}
       {mediaItems.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
           {mediaItems.map((item) => (
             <Card key={item.id} className="group overflow-hidden">
               <div className="aspect-square bg-cream-100 relative">
@@ -239,8 +240,8 @@ export default function MediaPage() {
                   </Button>
                 </div>
               </div>
-              <div className="p-2">
-                <p className="text-xs text-gray-600 truncate">{item.name}</p>
+              <div className="p-2 sm:p-3">
+                <p className="text-xs sm:text-sm text-gray-600 truncate">{item.name}</p>
               </div>
             </Card>
           ))}

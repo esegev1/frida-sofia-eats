@@ -85,17 +85,17 @@ export default function CategoriesPage() {
 
   return (
     <div className="max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">
             Categories
           </h1>
           <p className="text-gray-600 mt-1">
             Organize your recipes into categories
           </p>
         </div>
-        <Button onClick={() => setShowAddForm(true)}>
+        <Button onClick={() => setShowAddForm(true)} className="sm:self-start">
           <Plus className="h-4 w-4 mr-2" />
           Add Category
         </Button>
@@ -146,9 +146,9 @@ export default function CategoriesPage() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="p-4 flex items-center gap-4 hover:bg-cream-50"
+              className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:bg-cream-50"
             >
-              <GripVertical className="h-5 w-5 text-gray-300 cursor-grab" />
+              <GripVertical className="hidden sm:block h-5 w-5 text-gray-300 cursor-grab" />
 
               {editingId === category.id ? (
                 // Edit Mode
@@ -165,7 +165,7 @@ export default function CategoriesPage() {
                     placeholder="Description"
                     rows={2}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button size="sm" onClick={() => saveEdit(category.id)}>
                       <Check className="h-4 w-4 mr-1" />
                       Save
@@ -179,25 +179,25 @@ export default function CategoriesPage() {
               ) : (
                 // View Mode
                 <>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-medium text-gray-900">
                         {category.name}
                       </h3>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-400 truncate">
                         /{category.slug}
                       </span>
                     </div>
                     {category.description && (
-                      <p className="text-sm text-gray-600 mt-0.5">
+                      <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
                         {category.description}
                       </p>
                     )}
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                     {category.recipeCount} recipes
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-shrink-0">
                     <Button
                       variant="ghost"
                       size="icon"

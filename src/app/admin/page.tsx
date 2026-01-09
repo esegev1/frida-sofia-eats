@@ -13,17 +13,17 @@ const stats = [
 export default function AdminDashboard() {
   return (
     <div className="max-w-6xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      {/* Header - Responsive: stacked on mobile, horizontal on desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-gray-900">
             Dashboard
           </h1>
           <p className="text-gray-600 mt-1">
             Welcome back! Here's an overview of your site.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="sm:self-start">
           <Link href="/admin/recipes/new">
             <Plus className="h-4 w-4 mr-2" />
             New Recipe
