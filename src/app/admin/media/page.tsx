@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Upload, Image as ImageIcon, Trash2, Copy, Loader2, Check } from "lucide-react";
@@ -13,12 +13,15 @@ interface MediaItem {
   created_at: string;
 }
 
+/**
+ * Media Library Admin Page
+ * Allows uploading, viewing, and managing media files in Supabase Storage
+ */
 export default function MediaPage() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   const fetchMedia = useCallback(async () => {
@@ -62,6 +65,10 @@ export default function MediaPage() {
     await fetchMedia();
   }
 
+  /**
+   * Handle file upload - processes each file and uploads to Supabase Storage
+   * Validates file size (max 10MB) before uploading
+   */
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
 
@@ -124,17 +131,22 @@ export default function MediaPage() {
             Manage your images and media files
           </p>
         </div>
-        <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+        {/* Upload button - triggers hidden file input */}
+        <Button
+          onClick={() => document.getElementById("file-upload")?.click()}
+          disabled={isUploading}
+        >
           {isUploading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          {/* Upload Files */}
+          Upload Files
         </Button>
-        <label htmlFor="file-upload" className="sr-only">Upload files</label>
+
+        {/* Hidden file input element - more reliable than ref */}
         <input
-          ref={fileInputRef}
+          id="file-upload"
           type="file"
           accept="image/*"
           multiple
@@ -162,9 +174,10 @@ export default function MediaPage() {
           <p className="text-gray-600 mb-4">
             or click to browse from your computer
           </p>
+          {/* Browse button - opens file dialog */}
           <Button
             variant="outline"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => document.getElementById("file-upload")?.click()}
             disabled={isUploading}
           >
             Browse Files
