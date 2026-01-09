@@ -1,18 +1,115 @@
 "use client";
 
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Upload, Image as ImageIcon, Trash2, Copy } from "lucide-react";
+import { Upload, Image as ImageIcon, Trash2, Copy, Loader2, Check } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-// Placeholder - will be fetched from Supabase Storage
-const mediaItems: {
+interface MediaItem {
   id: string;
-  filename: string;
+  name: string;
   url: string;
-  uploadedAt: string;
-}[] = [];
+  created_at: string;
+}
 
 export default function MediaPage() {
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const supabase = createClient();
+
+  // Fetch media on load
+  useState(() => {
+    fetchMedia();
+  });
+
+  async function fetchMedia() {
+    const { data, error } = await supabase.storage
+      .from("media-library")
+      .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+
+    if (data && !error) {
+      const items: MediaItem[] = data
+        .filter((file) => file.name !== ".emptyFolderPlaceholder")
+        .map((file) => ({
+          id: file.id,
+          name: file.name,
+          url: supabase.storage.from("media-library").getPublicUrl(file.name).data.publicUrl,
+          created_at: file.created_at,
+        }));
+      setMediaItems(items);
+    }
+  }
+
+  async function uploadFile(file: File) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("media-library")
+      .upload(fileName, file);
+
+    if (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload: " + error.message);
+      return;
+    }
+
+    await fetchMedia();
+  }
+
+  async function handleUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    for (const file of Array.from(files)) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`${file.name} is too large. Max 10MB.`);
+        continue;
+      }
+      await uploadFile(file);
+    }
+    setIsUploading(false);
+  }
+
+  async function handleDelete(name: string) {
+    if (!confirm("Delete this image?")) return;
+
+    const { error } = await supabase.storage.from("media-library").remove([name]);
+
+    if (error) {
+      alert("Failed to delete: " + error.message);
+      return;
+    }
+
+    await fetchMedia();
+  }
+
+  function copyUrl(url: string) {
+    navigator.clipboard.writeText(url);
+    setCopied(url);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleUpload(e.dataTransfer.files);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
   return (
     <div className="max-w-6xl">
       {/* Header */}
@@ -25,15 +122,36 @@ export default function MediaPage() {
             Manage your images and media files
           </p>
         </div>
-        <Button>
-          <Upload className="h-4 w-4 mr-2" />
+        <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4 mr-2" />
+          )}
           Upload Files
         </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => handleUpload(e.target.files)}
+        />
       </div>
 
       {/* Upload Zone */}
       <Card className="mb-8">
-        <div className="border-2 border-dashed border-cream-300 rounded-xl p-12 text-center">
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+            isDragging
+              ? "border-terracotta-500 bg-terracotta-50"
+              : "border-cream-300"
+          }`}
+        >
           <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             Drag and drop files here
@@ -41,7 +159,13 @@ export default function MediaPage() {
           <p className="text-gray-600 mb-4">
             or click to browse from your computer
           </p>
-          <Button variant="outline">Browse Files</Button>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            Browse Files
+          </Button>
           <p className="text-xs text-gray-400 mt-4">
             Supported formats: JPG, PNG, WebP (max 10MB)
           </p>
@@ -49,7 +173,7 @@ export default function MediaPage() {
       </Card>
 
       {/* Empty State */}
-      {mediaItems.length === 0 && (
+      {mediaItems.length === 0 && !isUploading && (
         <Card className="p-12 text-center">
           <div className="mx-auto w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mb-4">
             <ImageIcon className="h-8 w-8 text-gray-400" />
@@ -73,20 +197,34 @@ export default function MediaPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.url}
-                  alt={item.filename}
+                  alt={item.name}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button variant="secondary" size="icon" className="h-8 w-8">
-                    <Copy className="h-4 w-4" />
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => copyUrl(item.url)}
+                  >
+                    {copied === item.url ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
                   </Button>
-                  <Button variant="secondary" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleDelete(item.name)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               <div className="p-2">
-                <p className="text-xs text-gray-600 truncate">{item.filename}</p>
+                <p className="text-xs text-gray-600 truncate">{item.name}</p>
               </div>
             </Card>
           ))}
