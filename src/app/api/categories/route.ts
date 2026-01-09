@@ -16,32 +16,30 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    // Get categories with recipe counts
+    // Get categories
     const { data: categories, error } = await supabase
       .from("categories")
-      .select(
-        `
-        *,
-        recipe_categories (count)
-      `
-      )
+      .select("*")
       .order("display_order", { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Transform to include recipe count
-    const categoriesWithCounts = categories?.map((cat) => {
-      const { recipe_categories, ...categoryData } = cat as {
-        recipe_categories?: { count: number }[];
-        [key: string]: unknown;
-      };
-      return {
-        ...categoryData,
-        recipeCount: recipe_categories?.[0]?.count || 0,
-      };
-    });
+    // Get recipe counts for each category
+    const categoriesWithCounts = await Promise.all(
+      (categories || []).map(async (cat) => {
+        const { count } = await supabase
+          .from("recipe_categories")
+          .select("*", { count: "exact", head: true })
+          .eq("category_id", cat.id);
+
+        return {
+          ...cat,
+          recipeCount: count || 0,
+        };
+      })
+    );
 
     return NextResponse.json(categoriesWithCounts);
   } catch (error) {

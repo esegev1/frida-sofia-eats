@@ -40,6 +40,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       recipes: {
         Row: {
@@ -123,6 +124,7 @@ export type Database = {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       recipe_categories: {
         Row: {
@@ -137,6 +139,7 @@ export type Database = {
           recipe_id?: string;
           category_id?: string;
         };
+        Relationships: [];
       };
       reviews: {
         Row: {
@@ -169,6 +172,7 @@ export type Database = {
           ip_hash?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       newsletter_subscribers: {
         Row: {
@@ -192,6 +196,7 @@ export type Database = {
           subscribed_at?: string;
           unsubscribed_at?: string | null;
         };
+        Relationships: [];
       };
       admin_users: {
         Row: {
@@ -215,6 +220,7 @@ export type Database = {
           is_active?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       media: {
         Row: {
@@ -256,6 +262,7 @@ export type Database = {
           alt_text?: string | null;
           uploaded_at?: string;
         };
+        Relationships: [];
       };
       instagram_webhook_log: {
         Row: {
@@ -285,7 +292,11 @@ export type Database = {
           received_at?: string;
           processed_at?: string | null;
         };
+        Relationships: [];
       };
+    };
+    Views: {
+      [_ in never]: never;
     };
     Functions: {
       get_recipe_rating: {
@@ -296,6 +307,12 @@ export type Database = {
         Args: { search_query: string };
         Returns: Database["public"]["Tables"]["recipes"]["Row"][];
       };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
     };
   };
 };
